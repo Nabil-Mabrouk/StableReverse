@@ -13,7 +13,7 @@ class Model():
         self.model_name=model_name
         self.tokenizer=AutoTokenizer.from_pretrained(model_name, token=ACCESS_KEY)
         self.model = AutoModelForCausalLM.from_pretrained(model_name, token= ACCESS_KEY)
-        self.coder = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer, max_new_tokens=500)
+        self.coder = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer, max_new_tokens=100)
     
     def generate(self,instructions):
         res = self.coder(instructions)
@@ -73,37 +73,33 @@ if __name__ == "__main__":
     model_name="stabilityai/stablecode-instruct-alpha-3b" 
     st.header(f"Model:")
     st.text(model_name)
-    st.text("Loading model .. this may take few minutes")
 
-    #st.header(f"GitHub Repository:")
-    #repo_url = "https://github.com/AntonOsika/gpt-engineer"
-    #repo_url=st.text_input('Enter a valid GitHub reposotory url: ', 'https://github.com/Nabil-Mabrouk/StableReverse')
-    #local_folder="repos"
+    st.header(f"GitHub Repository:")
+    repo_url = "https://github.com/AntonOsika/gpt-engineer"
+    repo_url=st.text_input('Enter a valid GitHub reposotory url: ', 'https://github.com/Nabil-Mabrouk/StableReverse')
+    local_folder="repos"
 
-    # Create the model
-    model=Model(model_name)
-    st.text("Model loaded successfuly!")
-    #if st.button("OK") and not st.button("stop"):
-
-        #repo=Repo(repo_url, local_folder)
-        #repo.clone()
-        #file_system=repo.get_file_system()
-        #st.header("FileSystem of the repo")
-        #st.text(json.dumps(file_system, indent=4))
+    if st.button("OK") and not st.button("stop"):
+        # Create the model
+        model=Model(model_name)
+        repo=Repo(repo_url, local_folder)
+        repo.clone()
+        file_system=repo.get_file_system()
+        st.header("FileSystem of the repo")
+        st.text(json.dumps(file_system, indent=4))
         
-        #output="The code failed to generate an output"
+        output="The code failed to generate an output"
 
-    prompt=st.text_area("Ask StableCode to do something: ", height=700)
-    if st.button("GO") and not st.button("reset"):
+        prompt=f"This is a filesystem for a github reposotory. Can you list the main python files? \n ### Filesystem: {file_system}\n #### You answer:"
         try:
             output=model.generate(prompt)
-            st.text("I got an answer to your request")
         except Exception as e:
-            print("Error while running the model:", str(e))
-            st.text("Error:", str(e))
+            print("Error while querying the model", str(e))
+            st.text(str(e))
 
         st.header("Model output:")
         st.text(output)
+
         print(output)
 
 
